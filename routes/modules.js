@@ -15,9 +15,9 @@ router.post('/', modulesController.create);
 
 router.get('/:code', modulesController.retrieveByCode);
 
-router.delete('/:code', modulesController.deleteByCode);
+router.delete('/:code', modulesController.delete);
 
-router.put('/:code', modulesController.updateByCode);
+router.put('/:code', modulesController.update);
 
 router.get('/', modulesController.retrieveAll);
 

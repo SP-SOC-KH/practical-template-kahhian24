@@ -20,6 +20,41 @@ module.exports.create = function (req, res) {
         });
 }
 
+module.exports.update = function (req, res) {
+    const code = req.params.code;
+    const credit = req.body.credit;
+
+    return modulesModel
+        .update(code, credit)
+        .then(function () {
+            return res.sendStatus(201);
+        })
+        .catch(function (error) {
+            console.error(error);
+            if (error instanceof UNIQUE_VIOLATION_ERROR) {
+                return res.status(400).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+module.exports.delete = function (req, res) {
+    const code = req.params.code;
+
+    return modulesModel
+        .del(code)
+        .then(function () {
+            return res.sendStatus(201);
+        })
+        .catch(function (error) {
+            console.error(error);
+            if (error instanceof UNIQUE_VIOLATION_ERROR) {
+                return res.status(400).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        });
+}
+
 module.exports.retrieveByCode = function (req, res) {
     const code = req.params.code;
 

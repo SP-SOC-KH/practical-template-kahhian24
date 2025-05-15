@@ -2,11 +2,13 @@ const { query } = require('../database');
 const { SQL_ERROR_CODE, UNIQUE_VIOLATION_ERROR, RAISE_EXCEPTION } = require('../errors');
 
 module.exports.retrieveAll = function retrieveAll() {
-    const sql = `SELECT adm_no, stud_name, gender, crse_code FROM student`;
+    // retrieve students via stored procedure
+    const sql = `SELECT adm_no, stud_name, gender, crse_code, gpa, gpa_last_updated
+    FROM student`;
     return query(sql).then(function (result) {
         return result.rows;
     });
-};
+}
 
 module.exports.enrolNewStudent = function enrolNewStudent(adminNumber, studentName, gender, address, dob, nationality, courseCode) {
     const sql = 'CALL enrol_new_student($1, $2, $3, $4, $5, $6, $7)';
