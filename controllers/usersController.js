@@ -9,7 +9,7 @@ const tokenAlgorithm = process.env.JWT_ALGORITHM;
 module.exports.login = function (req, res, next) {
     const accountNo = req.body.accountNo;
     const password = req.body.password;
-
+    console.log('Login attempt for account:', accountNo, password);
     if (!accountNo || !password) {
         return res.status(400).json({ message: 'Account Number and password are required' });
     }

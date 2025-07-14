@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model country {
+  country_name String    @id @db.VarChar(30)
+  language     String    @db.VarChar(30)
+  region       String    @db.VarChar(30)
+  student      student[]
+}
+
+model course {
+  crse_code  String     @id @db.VarChar(5)
+  crse_name  String     @db.VarChar(100)
+  offered_by String     @db.VarChar(5)
+  crse_fee   Decimal    @db.Decimal(7, 2)
+  lab_fee    Decimal?   @db.Decimal(7, 2)
+  department department @relation(fields: [offered_by], references: [dept_code], onDelete: NoAction, onUpdate: NoAction, map: "course_offered_by_fk")
+  student    student[]
+}
+
+model department {
+  dept_code                         String    @id @db.VarChar(5)
+  dept_name                         String    @db.VarChar(100)
+  hod                               String    @db.Char(4)
+  no_of_staff                       Int?
+  max_staff_strength                Int?
+  budget                            Decimal?  @db.Decimal(9, 2)
+  expenditure                       Decimal?  @db.Decimal(9, 2)
+  hod_appt_date                     DateTime? @db.Date
+  course                            course[]
+  staff_department_hodTostaff       staff     @relation("department_hodTostaff", fields: [hod], references: [staff_no], onDelete: NoAction, onUpdate: NoAction, map: "dept_hod_fk")
+  staff_staff_dept_codeTodepartment staff[]   @relation("staff_dept_codeTodepartment")
+}
+
+model module {
+  mod_code                                      String                 @id @db.VarChar(10)
+  mod_name                                      String                 @db.VarChar(100)
+  credit_unit                                   Int
+  mod_coord                                     String?                @db.Char(4)
+  staff                                         staff?                 @relation(fields: [mod_coord], references: [staff_no], onDelete: NoAction, onUpdate: NoAction, map: "mod_mod_coord_fk")
+  pre_requisite_pre_requisite_mod_codeTomodule  pre_requisite[]        @relation("pre_requisite_mod_codeTomodule")
+  pre_requisite_pre_requisite_requisiteTomodule pre_requisite[]        @relation("pre_requisite_requisiteTomodule")
+  stud_mod_performance                          stud_mod_performance[]
+}
+
+model pre_requisite {
+  mod_code                               String @db.VarChar(10)
+  requisite                              String @db.VarChar(10)
+  module_pre_requisite_mod_codeTomodule  module @relation("pre_requisite_mod_codeTomodule", fields: [mod_code], references: [mod_code], onDelete: NoAction, onUpdate: NoAction, map: "pre_requisite_mod_code_fk")
+  module_pre_requisite_requisiteTomodule module @relation("pre_requisite_requisiteTomodule", fields: [requisite], references: [mod_code], onDelete: NoAction, onUpdate: NoAction, map: "pre_requisite_requisite_fk")
+
+  @@id([mod_code, requisite])
+}
+
+model staff {
+  staff_no                               String            @id @db.Char(4)
+  staff_name                             String            @db.VarChar(100)
+  supervisor_staff_no                    String?           @db.Char(4)
+  dob                                    DateTime          @db.Date
+  grade                                  String            @db.VarChar(5)
+  marital_status                         String            @db.VarChar(1)
+  pay                                    Decimal?          @db.Decimal(7, 2)
+  allowance                              Decimal?          @db.Decimal(7, 2)
+  hourly_rate                            Decimal?          @db.Decimal(7, 2)
+  gender                                 String            @db.Char(1)
+  citizenship                            String            @db.VarChar(10)
+  join_yr                                Int
+  dept_code                              String            @db.VarChar(5)
+  type_of_employment                     String            @db.VarChar(2)
+  highest_qln                            String            @db.VarChar(10)
+  designation                            String            @db.VarChar(20)
+  department_department_hodTostaff       department[]      @relation("department_hodTostaff")
+  module                                 module[]
+  department_staff_dept_codeTodepartment department        @relation("staff_dept_codeTodepartment", fields: [dept_code], references: [dept_code], onDelete: NoAction, onUpdate: NoAction, map: "staff_dept_code_fk")
+  staff_dependent                        staff_dependent[]
+}
+
+model staff_backup {
+  staff_no           String   @id @db.Char(4)
+  staff_name         String   @db.VarChar(100)
+  supervisor         String?  @db.Char(4)
+  dob                DateTime @db.Date
+  grade              String   @db.VarChar(5)
+  marital_status     String   @db.VarChar(1)
+  pay                Decimal? @db.Decimal(7, 2)
+  allowance          Decimal? @db.Decimal(7, 2)
+  hourly_rate        Decimal? @db.Decimal(7, 2)
+  gender             String   @db.Char(1)
+  citizenship        String   @db.VarChar(10)
+  join_yr            Int
+  dept_code          String   @db.VarChar(5)
+  type_of_employment String   @db.VarChar(2)
+  highest_qln        String   @db.VarChar(10)
+  designation        String   @db.VarChar(20)
+}
+
+model staff_dependent {
+  staff_no       String @db.Char(4)
+  dependent_name String @db.VarChar(30)
+  relationship   String @db.VarChar(20)
+  staff          staff  @relation(fields: [staff_no], references: [staff_no], onDelete: NoAction, onUpdate: NoAction, map: "staff_dependent_staff_no_fk")
+
+  @@id([staff_no, dependent_name])
+}
+
+model stud_mod_performance {
+  adm_no         String  @db.Char(4)
+  mod_registered String  @db.VarChar(10)
+  mark           Int?
+  grade          String? @db.Char(2)
+  student        student @relation(fields: [adm_no], references: [adm_no], onDelete: NoAction, onUpdate: NoAction)
+  module         module  @relation(fields: [mod_registered], references: [mod_code], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([adm_no, mod_registered])
+}
+
+model student {
+  adm_no               String                 @id @db.Char(4)
+  stud_name            String                 @db.VarChar(30)
+  gender               String                 @db.Char(1)
+  address              String                 @db.VarChar(100)
+  mobile_phone         String?                @db.Char(8)
+  home_phone           String?                @db.Char(8)
+  dob                  DateTime               @db.Date
+  nationality          String                 @db.VarChar(30)
+  crse_code            String                 @db.VarChar(5)
+  stud_mod_performance stud_mod_performance[]
+  course               course                 @relation(fields: [crse_code], references: [crse_code], onDelete: NoAction, onUpdate: NoAction, map: "student_crse_code_fk")
+  country              country                @relation(fields: [nationality], references: [country_name], onDelete: NoAction, onUpdate: NoAction, map: "student_nationality_fk")
+}
+
+model user_account {
+  id         Int    @id
+  account_no String @db.VarChar(6)
+  role       Int
+  password   String @db.VarChar(255)
+}
+
+model user_role {
+  id   Int    @id
+  name String @db.VarChar(25)
+}
